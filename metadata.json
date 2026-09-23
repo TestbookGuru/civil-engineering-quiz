@@ -1,0 +1,6 @@
+{
+  "name": "Civil Engineering Quick Fire Quiz",
+  "description": "Fast-paced 50-second civil engineering quick fire quiz with 200 questions across structures, geotechnical, hydraulics, RCC, and surveying.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
