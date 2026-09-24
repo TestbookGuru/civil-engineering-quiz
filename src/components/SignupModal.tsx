@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { sound } from '../utils/sound';
-import { User, Phone, Mail, LockKeyhole } from 'lucide-react';
+import { User, Phone, Mail, Award, CheckCircle2, X } from 'lucide-react';
 
 interface SignupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (profile: UserProfile) => void;
+  onSubmit: (profile: UserProfile) => Promise<void>;
   initialProfile: UserProfile;
 }
 
 export const SignupModal: React.FC<SignupModalProps> = ({
   isOpen,
+  onClose,
   onSubmit,
   initialProfile,
 }) => {
@@ -19,6 +20,8 @@ export const SignupModal: React.FC<SignupModalProps> = ({
   const [phone, setPhone] = useState(initialProfile.phone || '');
   const [email, setEmail] = useState(initialProfile.email || '');
   const [phoneError, setPhoneError] = useState<string>('');
+  const [submitError, setSubmitError] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -26,17 +29,19 @@ export const SignupModal: React.FC<SignupModalProps> = ({
       setPhone(initialProfile.phone || '');
       setEmail(initialProfile.email || '');
       setPhoneError('');
+      setSubmitError('');
+      setIsSubmitting(false);
     }
   }, [isOpen, initialProfile]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Clean phone number
     const cleanedPhone = phone.replace(/[^0-9]/g, '');
-    if (cleanedPhone.length < 10) {
+    if (cleanedPhone.length !== 10) {
       setPhoneError('Please enter a valid 10-digit mobile number');
       return;
     }
@@ -48,31 +53,71 @@ export const SignupModal: React.FC<SignupModalProps> = ({
       phone: cleanedPhone,
       email: email.trim().toLowerCase(),
     };
-    onSubmit(prof);
+
+    setSubmitError('');
+    setIsSubmitting(true);
+    try {
+      await onSubmit(prof);
+    } catch (error) {
+      console.error('Unable to save quiz lead:', error);
+      setSubmitError('Unable to save your details right now. Please try again.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="modal active fixed inset-0 z-50 grid place-items-center bg-[#021528]/85 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="modal-card w-full max-w-[440px] my-auto bg-gradient-to-b from-[#051c36] to-[#08294e] border-2 border-[#20e7ff] p-6 sm:p-7 rounded-lg shadow-2xl">
-        <div className="flex items-center gap-1.5 text-[11px] font-black tracking-widest text-[#ffd43b] uppercase">
-          <LockKeyhole className="w-3.5 h-3.5" />
-          STUDENT SIGN IN REQUIRED
+    <div className="modal active fixed inset-0 z-50 grid place-items-center p-4 overflow-y-auto select-none">
+      {/* ======================================================== */}
+      {/* SOOTHING COOL FROSTED GLASS BACKGROUND                  */}
+      {/* ======================================================== */}
+      <div
+        className="fixed inset-0 backdrop-blur-xl bg-slate-950/65 transition-all duration-500 pointer-events-auto"
+        onClick={onClose}
+      >
+        {/* Soft soothing cyan/ice ambient glow orb */}
+        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] rounded-full bg-cyan-400/20 blur-[90px] pointer-events-none" />
+        {/* Calming deep oceanic blue ambient glow orb */}
+        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[420px] h-[420px] rounded-full bg-sky-500/25 blur-[100px] pointer-events-none" />
+      </div>
+
+      {/* ======================================================== */}
+      {/* BRIGHT COLOR POPUP BOX                                   */}
+      {/* ======================================================== */}
+      <div className="relative w-full max-w-[460px] my-auto bg-gradient-to-b from-white via-sky-50/60 to-amber-50/70 border-3 border-amber-400 rounded-2xl shadow-[0_25px_60px_-15px_rgba(255,183,3,0.45),0_0_30px_rgba(32,231,255,0.25)] p-6 sm:p-7 text-slate-900 z-10 animate-in fade-in zoom-in-95 duration-200">
+        {/* Top Dismiss Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition-colors cursor-pointer"
+          title="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Bright Safety Yellow / Amber Badge */}
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 text-[11px] font-black tracking-wider uppercase shadow-sm">
+          <Award className="w-3.5 h-3.5 text-slate-900" />
+          <span>Student Scorecard Access</span>
         </div>
 
-        <div className="modal-title text-2xl font-black text-white mt-1">
+        {/* Modal Title in Bright, Bold Slate-900 */}
+        <div className="text-2xl sm:text-[26px] font-black text-slate-900 mt-2.5 tracking-tight leading-tight">
           Unlock Your Scorecard
         </div>
 
-        <div className="modal-copy text-xs text-sky-200 mt-1.5 leading-relaxed">
-          To view your official performance scorecard, last 5 sessions progression graph, and complete question solutions, please provide your details.
+        {/* Subtitle with cool clarity */}
+        <div className="text-xs sm:text-[13px] text-slate-600 mt-1.5 leading-relaxed font-medium">
+          Enter your details below to instantly view your official Civil Engineering performance breakdown, ranking, and step-by-step solutions:
         </div>
 
         <form onSubmit={handleSubmit} id="signupForm" className="mt-5 space-y-3.5">
-          {/* Name Field */}
-          <div className="form-group">
-            <label htmlFor="nameInput" className="flex items-center gap-1.5 text-xs font-bold text-sky-100 uppercase tracking-wider mb-1">
-              <User className="w-3.5 h-3.5 text-[#20e7ff]" />
-              FULL NAME <span className="text-amber-400">*</span>
+          {/* Full Name Field */}
+          <div className="form-group text-left">
+            <label
+              htmlFor="nameInput"
+              className="flex items-center gap-1.5 text-xs font-black text-slate-800 uppercase tracking-wider mb-1"
+            >
+              <User className="w-3.5 h-3.5 text-amber-500" />
+              FULL NAME <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
@@ -83,18 +128,21 @@ export const SignupModal: React.FC<SignupModalProps> = ({
               autoFocus
               autoComplete="name"
               placeholder="e.g. Rahul Sharma"
-              className="w-full text-white bg-[#031326] border border-[#20e7ff]/40 p-2.5 rounded text-sm outline-none focus:border-[#20e7ff] focus:ring-1 focus:ring-[#20e7ff]"
+              className="w-full text-slate-900 bg-white border-2 border-sky-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/20 p-2.5 rounded-xl text-sm font-semibold outline-none transition-all placeholder:text-slate-400 shadow-sm"
             />
           </div>
 
           {/* Mobile Number Field */}
-          <div className="form-group">
-            <label htmlFor="phoneInput" className="flex items-center gap-1.5 text-xs font-bold text-sky-100 uppercase tracking-wider mb-1">
-              <Phone className="w-3.5 h-3.5 text-[#20e7ff]" />
-              MOBILE NUMBER <span className="text-amber-400">*</span>
+          <div className="form-group text-left">
+            <label
+              htmlFor="phoneInput"
+              className="flex items-center gap-1.5 text-xs font-black text-slate-800 uppercase tracking-wider mb-1"
+            >
+              <Phone className="w-3.5 h-3.5 text-amber-500" />
+              MOBILE NUMBER <span className="text-rose-500">*</span>
             </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-3 text-xs font-black text-sky-300 bg-[#072442] border border-r-0 border-[#20e7ff]/40 rounded-l">
+            <div className="flex shadow-sm rounded-xl overflow-hidden border-2 border-sky-200 focus-within:border-amber-500 focus-within:ring-4 focus-within:ring-amber-400/20 transition-all">
+              <span className="inline-flex items-center px-3.5 text-xs font-black text-amber-900 bg-amber-100 border-r border-sky-200">
                 +91
               </span>
               <input
@@ -109,21 +157,24 @@ export const SignupModal: React.FC<SignupModalProps> = ({
                 maxLength={12}
                 autoComplete="tel"
                 placeholder="9876543210"
-                className="w-full text-white bg-[#031326] border border-[#20e7ff]/40 p-2.5 rounded-r text-sm outline-none focus:border-[#20e7ff] focus:ring-1 focus:ring-[#20e7ff]"
+                className="w-full text-slate-900 bg-white p-2.5 text-sm font-semibold outline-none placeholder:text-slate-400"
               />
             </div>
             {phoneError && (
-              <p className="text-[11px] text-rose-400 font-semibold mt-1">
+              <p className="text-[11px] text-rose-500 font-bold mt-1">
                 {phoneError}
               </p>
             )}
           </div>
 
           {/* Email Address Field */}
-          <div className="form-group">
-            <label htmlFor="emailInput" className="flex items-center gap-1.5 text-xs font-bold text-sky-100 uppercase tracking-wider mb-1">
-              <Mail className="w-3.5 h-3.5 text-[#20e7ff]" />
-              EMAIL ADDRESS <span className="text-amber-400">*</span>
+          <div className="form-group text-left">
+            <label
+              htmlFor="emailInput"
+              className="flex items-center gap-1.5 text-xs font-black text-slate-800 uppercase tracking-wider mb-1"
+            >
+              <Mail className="w-3.5 h-3.5 text-amber-500" />
+              EMAIL ADDRESS <span className="text-rose-500">*</span>
             </label>
             <input
               type="email"
@@ -133,17 +184,42 @@ export const SignupModal: React.FC<SignupModalProps> = ({
               required
               autoComplete="email"
               placeholder="e.g. rahul@example.com"
-              className="w-full text-white bg-[#031326] border border-[#20e7ff]/40 p-2.5 rounded text-sm outline-none focus:border-[#20e7ff] focus:ring-1 focus:ring-[#20e7ff]"
+              className="w-full text-slate-900 bg-white border-2 border-sky-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/20 p-2.5 rounded-xl text-sm font-semibold outline-none transition-all placeholder:text-slate-400 shadow-sm"
             />
           </div>
 
-          <div className="modal-actions pt-2">
+          {/* Bright Action Button */}
+          <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-black text-xs uppercase tracking-wider rounded shadow-xl cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              disabled={isSubmitting}
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-300 hover:to-orange-400 disabled:opacity-70 disabled:cursor-not-allowed text-slate-950 font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_12px_24px_-4px_rgba(245,158,11,0.55)] cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0 border border-amber-300"
             >
-              SIGN IN & VIEW SCORECARD
+              {isSubmitting ? 'SAVING DETAILS...' : 'SIGN IN & VIEW SCORECARD ➔'}
             </button>
+            {submitError && (
+              <p className="text-center text-[11px] text-rose-600 font-bold mt-2">
+                {submitError}
+              </p>
+            )}
+          </div>
+
+          {/* Bright Features / Assurance Badges */}
+          <div className="flex items-center justify-center gap-3 pt-2 text-[11px] font-bold text-slate-600">
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Instant Score</span>
+            </div>
+            <span>•</span>
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Full Solutions</span>
+            </div>
+            <span>•</span>
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Free PDF Notes</span>
+            </div>
           </div>
         </form>
       </div>

@@ -108,13 +108,9 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
         </div>
 
         {/* HUD FOOTER */}
-        <div className="quiz-footer">
-          <div className="keyboard-hint">
-            SELECT WITH <span>1</span> <span>2</span> <span>3</span> <span>4</span>
-          </div>
-
+        <div className="quiz-footer flex justify-end">
           <div className="question-counter font-black" id="questionCounter">
-            {currentIndex + 1} / {totalQuestions}
+            QUESTION {currentIndex + 1} / {totalQuestions}
           </div>
         </div>
       </div>

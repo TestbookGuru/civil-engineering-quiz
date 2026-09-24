@@ -99,6 +99,21 @@ class SoundManager {
       this.playTone(f, 0.22, 'triangle', 0.22, idx * 0.1);
     });
   }
+
+  public bulldozerHonk() {
+    // Dual tone industrial horn
+    this.playTone(220, 0.25, 'sawtooth', 0.18, 0);
+    this.playTone(277.18, 0.25, 'sawtooth', 0.18, 0);
+    this.playTone(220, 0.35, 'sawtooth', 0.2, 0.12);
+    this.playTone(277.18, 0.35, 'sawtooth', 0.2, 0.12);
+  }
+
+  public engineRev() {
+    // Engine acceleration rumble
+    this.playTone(95, 0.35, 'triangle', 0.25, 0);
+    this.playTone(130, 0.45, 'sawtooth', 0.22, 0.1);
+    this.playTone(190, 0.6, 'sawtooth', 0.2, 0.25);
+  }
 }
 
 export const sound = new SoundManager();

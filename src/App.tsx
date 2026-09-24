@@ -11,6 +11,8 @@ import { SignupModal } from './components/SignupModal';
 import { ResultsScreen } from './components/ResultsScreen';
 import { ReviewModal } from './components/ReviewModal';
 
+const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwFzkFN7q7-vdTc5dpzZyOq03Ik9JVNsCYdkZuSg8ejXiW6xBHcuq4Ku03nq2pW950g3Q/exec';
+
 export default function App() {
   const [view, setView] = useState<GameView>('start');
   const [questions, setQuestions] = useState<ActiveQuestion[]>([]);
@@ -27,6 +29,7 @@ export default function App() {
 
   // Lead / student profile modal
   const [isSignupOpen, setIsSignupOpen] = useState<boolean>(false);
+  const [isScoreUnlocked, setIsScoreUnlocked] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
     try {
       const saved = localStorage.getItem('civil_quiz_user_profile');
@@ -123,6 +126,8 @@ export default function App() {
       clearQuizTimer();
       setIsTimeUp(timeExpired);
       setView('complete');
+      setIsScoreUnlocked(false);
+      setIsSignupOpen(false);
 
       const finalScore = scoreRef.current;
 
@@ -218,6 +223,8 @@ export default function App() {
     scoreRef.current = 0;
     setSelectedAnswerIdx(null);
     setIsTimeUp(false);
+    setIsScoreUnlocked(false);
+    setIsSignupOpen(false);
     setAnswerRecords([]);
     setShowCelebration(false);
     setView('quiz');
@@ -332,20 +339,39 @@ export default function App() {
     setIsSignupOpen(true);
   };
 
-  const handleProfileSubmit = (profile: UserProfile) => {
+  const handleProfileSubmit = async (profile: UserProfile): Promise<void> => {
+    const payload = new URLSearchParams({
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone,
+    });
+
+    // Google Apps Script web apps are cross-origin. no-cors lets the browser
+    // deliver the form-encoded POST without exposing Google account credentials.
+    await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: payload.toString(),
+    });
+
     setUserProfile(profile);
     try {
       localStorage.setItem('civil_quiz_user_profile', JSON.stringify(profile));
     } catch {}
-    setIsSignupOpen(false);
-    showFinalResults();
-  };
 
-  const showFinalResults = () => {
+    setIsSignupOpen(false);
+    setIsScoreUnlocked(true);
     setView('results');
-    if (score >= 7) {
+
+    const finalScore = scoreRef.current;
+    if (finalScore >= 7) {
       sound.victoryFanfare();
       triggerConfetti();
+    } else {
+      sound.successSound();
     }
   };
 
@@ -358,6 +384,8 @@ export default function App() {
 
   const handleRetry = () => {
     clearQuizTimer();
+    setIsScoreUnlocked(false);
+    setIsSignupOpen(false);
     setView('start');
   };
 
@@ -418,6 +446,8 @@ export default function App() {
           userProfile={userProfile}
           answerRecords={answerRecords}
           sessionHistory={sessionHistory}
+          isUnlocked={isScoreUnlocked}
+          onUnlockRequest={() => setIsSignupOpen(true)}
           onRetry={handleRetry}
           onOpenReview={() => setIsReviewOpen(true)}
         />

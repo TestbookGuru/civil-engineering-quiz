@@ -1,5 +1,17 @@
-import React, { useState, useMemo } from 'react';
-import { ExternalLink, RotateCcw, CheckSquare, Sparkles, TrendingUp, Award, Activity, Download } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  ExternalLink,
+  RotateCcw,
+  CheckSquare,
+  Sparkles,
+  TrendingUp,
+  Award,
+  Activity,
+  FileText,
+  Lock,
+  Unlock,
+  Layers,
+} from 'lucide-react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -19,6 +31,8 @@ interface ResultsScreenProps {
   userProfile: UserProfile;
   answerRecords: AnswerRecord[];
   sessionHistory: SessionScoreRecord[];
+  isUnlocked: boolean;
+  onUnlockRequest: () => void;
   onRetry: () => void;
   onOpenReview: () => void;
 }
@@ -29,6 +43,8 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
   userProfile: _userProfile,
   answerRecords: _answerRecords,
   sessionHistory,
+  isUnlocked,
+  onUnlockRequest,
   onRetry,
   onOpenReview,
 }) => {
@@ -38,23 +54,59 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
   });
   const [hasRated, setHasRated] = useState<boolean>(false);
 
-  const percentage = Math.round((score / totalQuestions) * 100);
+  const targetPercent = Math.round((score / totalQuestions) * 100);
 
+  // Animated count-up states initialized with actual score so background scorecard is bright & loaded
+  const [displayScore, setDisplayScore] = useState<number>(score);
+  const [displayPercent, setDisplayPercent] = useState<number>(targetPercent);
+
+  // Animate numbers celebratory count-up when unlocked
+  useEffect(() => {
+    if (!isUnlocked) {
+      setDisplayScore(score);
+      setDisplayPercent(targetPercent);
+      return;
+    }
+
+    const duration = 1000; // ms
+    const startTime = performance.now();
+
+    const animateCount = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      setDisplayScore(Math.round(ease * score));
+      setDisplayPercent(Math.round(ease * targetPercent));
+
+      if (progress < 1) {
+        requestAnimationFrame(animateCount);
+      } else {
+        setDisplayScore(score);
+        setDisplayPercent(targetPercent);
+      }
+    };
+
+    requestAnimationFrame(animateCount);
+  }, [isUnlocked, score, targetPercent]);
+
+  // Positive messaging (never negative)
   let title = 'GREAT JOB!';
-  let message = 'Strong performance across Civil Engineering topics.';
+  let message = 'Strong performance across Civil Engineering core concepts!';
 
   if (score >= 9) {
-    title = 'EXCELLENT RUN!';
-    message = 'Outstanding speed and accuracy across all Civil Engineering disciplines!';
+    title = 'OUTSTANDING RUN!';
+    message = 'Mastery level speed and accuracy across all Civil Engineering disciplines!';
   } else if (score >= 7) {
     title = 'GREAT JOB!';
-    message = 'Strong performance across Civil Engineering core concepts and formulas.';
+    message = 'Solid engineering reasoning and high-speed accuracy!';
   } else if (score >= 5) {
-    title = 'GOOD RUN!';
-    message = 'A solid attempt. Focus on revising formula applications and code provisions.';
+    title = 'GOOD EFFORT!';
+    message = 'A solid attempt. Revise key formulas and run another Quick Fire sprint!';
   } else {
-    title = 'KEEP PRACTISING!';
-    message = 'Use the specialized Civil Engineering notes below and run the Quick Fire again!';
+    title = 'KEEP BUILDING!';
+    message = 'Every attempt sharpens your speed. Review the notes below and try again!';
   }
 
   const handleStarClick = (rateVal: number) => {
@@ -62,16 +114,6 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
     setHasRated(true);
     localStorage.setItem('civil_quiz_user_rating', String(rateVal));
     sound.playBeep(650, 0.08, 'sine', 0.2);
-  };
-
-  const handleRetryClick = () => {
-    sound.buttonClick();
-    onRetry();
-  };
-
-  const handleReviewClick = () => {
-    sound.buttonClick();
-    onOpenReview();
   };
 
   // Prepare Deduplicated & Sequenced Last 5 Sessions Data for the Line Chart
@@ -85,7 +127,6 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
       if (item.id && seenIds.has(item.id)) return;
       if (item.id) seenIds.add(item.id);
 
-      // Check if previous entry is identical in time and score (to eliminate double clicks)
       const prev = list[list.length - 1];
       if (prev && prev.date === item.date && prev.score === item.score && prev.percentage === item.percentage) {
         return;
@@ -105,292 +146,391 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
         {
           label: 'Run 1',
           shortLabel: 'R1',
-          score,
+          score: score,
           total: totalQuestions,
-          percentage,
+          percentage: targetPercent,
           date: 'Current Attempt',
         },
       ];
     }
 
-    // Determine starting run number so the last 5 runs are strictly sequential
-    // e.g. If 5 total: Run 1, Run 2, Run 3, Run 4, Run 5
-    // e.g. If 7 total: Run 3, Run 4, Run 5, Run 6, Run 7
     const startRunNum = Math.max(1, totalRuns - last5Raw.length + 1);
 
-    return last5Raw.map((item, idx) => {
-      const runNum = startRunNum + idx;
+    return last5Raw.map((item, index) => {
+      const runNumber = startRunNum + index;
       return {
-        label: `Run ${runNum}`,
-        shortLabel: `R${runNum}`,
-        score: item.score,
-        total: item.total || 10,
-        percentage: item.percentage || Math.round((item.score / (item.total || 10)) * 100),
-        date: item.date || `Run ${runNum}`,
+        ...item,
+        label: `Run ${runNumber}`,
+        shortLabel: `R${runNumber}`,
       };
     });
-  }, [last5Raw, totalRuns, score, totalQuestions, percentage]);
+  }, [last5Raw, totalRuns, score, totalQuestions, targetPercent, isUnlocked]);
 
-  const avgScore = (
-    chartData.reduce((acc, curr) => acc + curr.score, 0) / chartData.length
-  ).toFixed(1);
-
-  const highestScore = Math.max(...chartData.map((d) => d.score));
-
-  const firstScore = chartData[0]?.score ?? score;
-  const lastScore = chartData[chartData.length - 1]?.score ?? score;
-  const diff = lastScore - firstScore;
-
-  // Custom Chart Tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-[#0284c7] text-white p-2.5 rounded shadow-xl border border-white/40 text-xs">
-          <div className="font-extrabold text-amber-300 uppercase tracking-wider">{data.label}</div>
-          <div className="text-white font-bold text-sm mt-0.5">
-            Score: {data.score} / {data.total} ({data.percentage}%)
-          </div>
-          <div className="text-sky-100 text-[10px] mt-0.5">{data.date}</div>
-        </div>
-      );
-    }
-    return null;
-  };
+  // Circular progress math (radius: 54, circum: ~339.3)
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (displayPercent / 100) * circumference;
 
   return (
-    <section className="view results-screen active flex items-center justify-center min-h-screen p-3 sm:p-5 z-20 overflow-y-auto">
-      <div className="results-layout max-h-[92vh] w-full max-w-[980px] shadow-2xl">
-        {/* SCORE SIDEBAR */}
-        <div className="score-side">
-          <div className="score-caption">FINAL SCORE</div>
+    <section className="view results-screen active flex items-center justify-center min-h-screen p-2 sm:p-4 z-20 overflow-y-auto">
+      <div className="results-layout w-full max-w-[1100px] my-auto bg-white border border-slate-300 rounded-xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12">
+        {/* LEFT COLUMN: SCORECARD PREVIEW & RING */}
+        <div className="score-side md:col-span-5 bg-gradient-to-b from-slate-900 via-sky-950 to-slate-900 text-white p-5 sm:p-7 flex flex-col items-center justify-between text-center relative border-b md:border-b-0 md:border-r border-sky-800/40">
+          {/* Subtle blueprint grid overlay */}
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(32,231,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(32,231,255,0.4) 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+          />
 
-          <div className="score-number" id="scoreNumber">
-            {score} / {totalQuestions}
+          {/* TOP TAG */}
+          <div className="relative z-10 w-full flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#ffd43b] flex items-center gap-1">
+              <Award className="w-3.5 h-3.5 text-[#ffd43b]" />
+              CIVIL QUICK FIRE
+            </span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-sky-300 bg-sky-900/60 px-2 py-0.5 rounded border border-sky-400/30">
+              10 QS SPRINT
+            </span>
           </div>
 
-          <div className="score-percent" id="scorePercent">
-            {percentage}%
-          </div>
+          {/* MAIN CIRCULAR SCORE RING */}
+          <div className="relative z-10 my-4 flex flex-col items-center">
+            <div className="relative w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 130 130">
+                {/* Background Ring */}
+                <circle
+                  cx="65"
+                  cy="65"
+                  r={radius}
+                  fill="transparent"
+                  stroke="#1e293b"
+                  strokeWidth="10"
+                />
+                {/* Animated Progress Ring */}
+                <circle
+                  cx="65"
+                  cy="65"
+                  r={radius}
+                  fill="transparent"
+                  stroke={score >= 7 ? '#35e58b' : '#20e7ff'}
+                  strokeWidth="10"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  className="transition-all duration-700 ease-out"
+                />
+              </svg>
 
-          <div className="mt-5 w-full space-y-2">
-            <button
-              onClick={handleReviewClick}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-black uppercase tracking-wider bg-white/15 hover:bg-white/25 border border-white/40 text-white rounded cursor-pointer transition-all shadow-md"
-            >
-              <CheckSquare className="w-3.5 h-3.5 text-amber-300" />
-              Review Answers
-            </button>
-          </div>
-
-          {/* Quick Stats in Sidebar */}
-          <div className="mt-5 pt-4 border-t border-white/20 w-full grid grid-cols-2 gap-2 text-center text-xs">
-            <div className="bg-black/15 p-2 rounded border border-white/10">
-              <div className="text-[10px] text-sky-200 uppercase font-bold">5-Run Avg</div>
-              <div className="text-base font-black text-white">{avgScore} / 10</div>
-            </div>
-            <div className="bg-black/15 p-2 rounded border border-white/10">
-              <div className="text-[10px] text-sky-200 uppercase font-bold">Sessions</div>
-              <div className="text-base font-black text-amber-300">{chartData.length} Completed</div>
-            </div>
-          </div>
-        </div>
-
-        {/* RESULTS CONTENT */}
-        <div className="result-content flex flex-col justify-between overflow-y-auto max-h-[88vh] p-5 sm:p-7 bg-white text-slate-800">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="result-title text-slate-900 font-black" id="resultTitle">
-                  {title}
+              {/* Inside Circle Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                  {displayScore}
+                  <span className="text-lg sm:text-xl font-bold text-sky-300">/10</span>
                 </span>
-                {score >= 8 && <Sparkles className="w-5 h-5 text-amber-500 animate-spin-slow" />}
-              </div>
-
-              {diff !== 0 && chartData.length > 1 && (
-                <div className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>
-                    {diff > 0 ? `+${diff}` : diff} pts vs first session
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="result-message text-slate-600 text-sm mt-1" id="resultMessage">
-              {message}
-            </div>
-
-            {/* SCORE PROGRESSION LINE CHART (LAST 5 SESSIONS) */}
-            <div className="mt-4 p-3.5 bg-gradient-to-br from-sky-50 to-blue-50/60 rounded-xl border border-sky-200/80 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-900 tracking-wide uppercase">
-                  <Activity className="w-4 h-4 text-sky-600" />
-                  Score Progression (Last 5 Sessions)
-                </div>
-                <div className="text-[11px] font-bold text-slate-500">
-                  Target Benchmark: <span className="text-emerald-600 font-extrabold">7 / 10 (70%)</span>
-                </div>
-              </div>
-
-              <div className="w-full h-[155px] pt-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={chartData}
-                    margin={{ top: 10, right: 18, left: -22, bottom: 4 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
-                    <XAxis
-                      dataKey="label"
-                      stroke="#64748b"
-                      tick={{ fill: '#475569', fontSize: 11, fontWeight: 700 }}
-                      axisLine={{ stroke: '#94a3b8' }}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      domain={[0, 10]}
-                      ticks={[0, 2, 4, 6, 8, 10]}
-                      stroke="#64748b"
-                      tick={{ fill: '#475569', fontSize: 10, fontWeight: 600 }}
-                      axisLine={{ stroke: '#94a3b8' }}
-                      tickLine={false}
-                    />
-                    <Tooltip content={<CustomTooltip />} />
-                    <ReferenceLine
-                      y={7}
-                      stroke="#10b981"
-                      strokeDasharray="4 4"
-                      label={{
-                        value: '70% PASS',
-                        fill: '#059669',
-                        fontSize: 9,
-                        position: 'insideTopRight',
-                        fontWeight: 700,
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="score"
-                      stroke="#0284c7"
-                      strokeWidth={3}
-                      dot={{ r: 5, fill: '#f59e0b', stroke: '#0284c7', strokeWidth: 2 }}
-                      activeDot={{ r: 7, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-slate-500 mt-1 pt-1.5 border-t border-sky-200/50">
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
-                  Your Score Points
-                </span>
-                <span>
-                  {chartData.length} of 5 recent attempts plotted
+                <span className="text-xs font-black text-[#ffd43b] tracking-wider mt-0.5">
+                  {displayPercent}% ACCURACY
                 </span>
               </div>
             </div>
 
-            {/* QUICK STUDY RESOURCES */}
-            <div className="resource-title text-sky-800 font-extrabold text-[11px] tracking-wider uppercase mt-4">
-              CONTINUE PRACTISING WITH TESTBOOK
+            {/* STATUS TITLE & MESSAGE */}
+            <div className="mt-2 text-center">
+              <div className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase">
+                {title}
+              </div>
+              <div className="text-xs text-sky-200 mt-1 max-w-[260px] mx-auto leading-snug">
+                {message}
+              </div>
+            </div>
+          </div>
+
+          {/* STATS TILES (ACCURACY, CORRECT, TOTAL) */}
+          <div className="relative z-10 w-full grid grid-cols-3 gap-2 my-2">
+            <div className="bg-slate-800/80 border border-sky-400/20 p-2.5 rounded-lg text-center">
+              <div className="text-[10px] font-black uppercase tracking-wider text-sky-300">
+                ACCURACY
+              </div>
+              <div className="text-base sm:text-lg font-black text-white mt-0.5">
+                {displayPercent}%
+              </div>
             </div>
 
-            <div className="resource-links mt-2 grid grid-cols-2 gap-2">
-              <a
-                className="resource-link flex items-center justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg text-xs font-bold text-slate-700 hover:text-sky-900 transition-all group shadow-xs"
-                href="https://testbook.com/civil-engineering"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>Civil Engineering Hub</span>
-                <ExternalLink className="w-3.5 h-3.5 text-sky-600 opacity-70 group-hover:opacity-100 transition-opacity" />
-              </a>
-
-              <a
-                className="resource-link flex items-center justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg text-xs font-bold text-slate-700 hover:text-sky-900 transition-all group shadow-xs"
-                href="https://testbook.com/rrb-je-civil/notes"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>RRB JE Civil Notes</span>
-                <ExternalLink className="w-3.5 h-3.5 text-sky-600 opacity-70 group-hover:opacity-100 transition-opacity" />
-              </a>
-
-              <a
-                className="resource-link flex items-center justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg text-xs font-bold text-slate-700 hover:text-sky-900 transition-all group shadow-xs"
-                href="https://testbook.com/ssc-je-ce/notes"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>SSC JE Civil Notes</span>
-                <ExternalLink className="w-3.5 h-3.5 text-sky-600 opacity-70 group-hover:opacity-100 transition-opacity" />
-              </a>
-
-              <a
-                className="resource-link flex items-center justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg text-xs font-bold text-slate-700 hover:text-sky-900 transition-all group shadow-xs"
-                href="https://testbook.com/civil-engineering/rcc-notes"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>RCC Formula Notes</span>
-                <ExternalLink className="w-3.5 h-3.5 text-sky-600 opacity-70 group-hover:opacity-100 transition-opacity" />
-              </a>
+            <div className="bg-slate-800/80 border border-sky-400/20 p-2.5 rounded-lg text-center">
+              <div className="text-[10px] font-black uppercase tracking-wider text-sky-300">
+                CORRECT
+              </div>
+              <div className="text-base sm:text-lg font-black text-[#35e58b] mt-0.5">
+                {displayScore}
+              </div>
             </div>
 
-            {/* RATING */}
-            <div className="rating-title flex items-center justify-between mt-3 text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">
-              <span>RATE THIS QUICK FIRE CHALLENGE</span>
-              {hasRated && <span className="text-xs text-emerald-600 font-bold">Thanks for your rating!</span>}
-            </div>
-
-            <div className="stars flex gap-1.5 mt-1" id="stars">
-              {[1, 2, 3, 4, 5].map((starVal) => (
-                <button
-                  key={starVal}
-                  type="button"
-                  onClick={() => handleStarClick(starVal)}
-                  data-rating={starVal}
-                  className={`star text-2xl cursor-pointer transition-transform hover:scale-115 ${
-                    starVal <= rating ? 'text-amber-400' : 'text-slate-300'
-                  }`}
-                  title={`${starVal} Star`}
-                >
-                  ★
-                </button>
-              ))}
+            <div className="bg-slate-800/80 border border-sky-400/20 p-2.5 rounded-lg text-center">
+              <div className="text-[10px] font-black uppercase tracking-wider text-sky-300">
+                QUESTIONS
+              </div>
+              <div className="text-base sm:text-lg font-black text-white mt-0.5">
+                10
+              </div>
             </div>
           </div>
 
           {/* ACTION BUTTONS */}
-          <div className="result-actions pt-3 mt-3 border-t border-slate-200 flex gap-2">
-            <button
-              onClick={handleRetryClick}
-              className="result-button primary flex-1 py-3 px-3 sm:px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all"
-              id="retryButton"
-            >
-              <RotateCcw className="w-4 h-4" />
-              TRY AGAIN
-            </button>
+          <div className="relative z-10 w-full flex flex-col gap-2 mt-2">
+            {!isUnlocked ? (
+              <>
+                <button
+                  onClick={onUnlockRequest}
+                  className="w-full py-2.5 px-4 bg-gradient-to-r from-[#ffd43b] via-[#ff951f] to-[#ff6f00] hover:from-[#ffe066] hover:to-[#ff851f] text-[#041427] font-black text-xs sm:text-sm uppercase tracking-widest rounded-lg shadow-[0_0_20px_rgba(255,149,31,0.5)] cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+                >
+                  <Unlock className="w-4 h-4 text-[#041427]" />
+                  <span>VIEW MY SCORE</span>
+                </button>
 
+                <div className="flex gap-2 w-full">
+                  <button
+                    onClick={onOpenReview}
+                    className="flex-1 py-2 px-3 bg-sky-800 hover:bg-sky-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    <CheckSquare className="w-3.5 h-3.5" />
+                    <span>Review (10)</span>
+                  </button>
+                  <button
+                    onClick={onRetry}
+                    className="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-sky-200 border border-sky-400/30 font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Try Again</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex gap-2 w-full">
+                <button
+                  onClick={onOpenReview}
+                  className="flex-1 py-2.5 px-3 bg-sky-700 hover:bg-sky-600 text-white font-black text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <CheckSquare className="w-3.5 h-3.5" />
+                  <span>Review (10)</span>
+                </button>
+
+                <button
+                  onClick={onRetry}
+                  className="flex-1 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-sky-200 border border-sky-400/30 font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Try Again</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: PROGRESSION CHART & STUDY RESOURCES */}
+        <div className="md:col-span-7 bg-white p-5 sm:p-6 flex flex-col justify-between text-left">
+          <div>
+            {/* PERFORMANCE GRAPH HEADER */}
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+              <div className="flex items-center gap-1.5 text-xs font-black tracking-wider text-slate-800 uppercase">
+                <TrendingUp className="w-4 h-4 text-sky-600" />
+                <span>PROGRESSION (LAST 5 SESSIONS)</span>
+              </div>
+              <span className="text-[11px] font-bold text-slate-500">
+                Target: ≥ 70%
+              </span>
+            </div>
+
+            {/* RECHARTS LINE GRAPH */}
+            <div className="h-36 sm:h-40 w-full bg-slate-50/80 border border-slate-200 rounded-lg p-2 relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
+                  <XAxis
+                    dataKey="shortLabel"
+                    tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }}
+                    axisLine={{ stroke: '#94a3b8' }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    domain={[0, 10]}
+                    ticks={[0, 2, 4, 6, 8, 10]}
+                    tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }}
+                    axisLine={{ stroke: '#94a3b8' }}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#0f172a',
+                      borderRadius: '8px',
+                      border: '1px solid #38bdf8',
+                      color: '#fff',
+                      fontSize: '12px',
+                    }}
+                    formatter={(val: any) => [`${val ?? 0} / 10 (${Number(val ?? 0) * 10}%)`, 'Score']}
+                    labelFormatter={(label) => `Session ${label}`}
+                  />
+                  <ReferenceLine y={7} stroke="#22c55e" strokeDasharray="4 4" />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#0284c7"
+                    strokeWidth={3}
+                    dot={{ fill: '#0284c7', stroke: '#fff', strokeWidth: 2, r: 4 }}
+                    activeDot={{ fill: '#ffd43b', stroke: '#0284c7', strokeWidth: 2, r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* TESTBOOK STUDY RESOURCES: STRICT 3x2 on Desktop, 2x3 on Mobile */}
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[11px] font-black tracking-wider text-slate-800 uppercase flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-sky-600" />
+                  <span>TESTBOOK CIVIL STUDY RESOURCES</span>
+                </div>
+                <span className="text-[10px] font-bold text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">
+                  PDF & TESTS
+                </span>
+              </div>
+
+              {/* 3 cols x 2 rows (desktop) and 2 cols x 3 rows (mobile) */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {/* 1. Test Series */}
+                <a
+                  href="https://testbook.com/ae-je-civil-previous-year/test-series/my"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg transition-all group shadow-xs"
+                >
+                  <div className="text-xs font-bold text-slate-800 group-hover:text-sky-900 line-clamp-1">
+                    AE/JE Test Series
+                  </div>
+                  <div className="flex items-center justify-between mt-1 text-[10px] text-sky-600 font-semibold">
+                    <span>Mock Tests</span>
+                    <ExternalLink className="w-3 h-3 shrink-0 opacity-70 group-hover:opacity-100" />
+                  </div>
+                </a>
+
+                {/* 2. Building Construction Notes */}
+                <a
+                  href="https://testbook.com/pdf-viewer?u=https:%2F%2Fcdn.testbook.com%2F1746257479223-Building%20Construction,%20Maintenance%20Notes.pdf%2F1746257478.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg transition-all group shadow-xs"
+                >
+                  <div className="text-xs font-bold text-slate-800 group-hover:text-sky-900 line-clamp-1">
+                    Building Const. Notes
+                  </div>
+                  <div className="flex items-center justify-between mt-1 text-[10px] text-rose-600 font-semibold">
+                    <span>PDF Viewer</span>
+                    <ExternalLink className="w-3 h-3 shrink-0 opacity-70 group-hover:opacity-100" />
+                  </div>
+                </a>
+
+                {/* 3. Concrete Technology Notes */}
+                <a
+                  href="https://testbook.com/pdf-viewer?u=https:%2F%2Fcdn.testbook.com%2F1746257479224-Concrete%20Technology%20Notes.pdf%2F1746257478.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg transition-all group shadow-xs"
+                >
+                  <div className="text-xs font-bold text-slate-800 group-hover:text-sky-900 line-clamp-1">
+                    Concrete Tech Notes
+                  </div>
+                  <div className="flex items-center justify-between mt-1 text-[10px] text-rose-600 font-semibold">
+                    <span>PDF Viewer</span>
+                    <ExternalLink className="w-3 h-3 shrink-0 opacity-70 group-hover:opacity-100" />
+                  </div>
+                </a>
+
+                {/* 4. Engineering Mechanics Notes */}
+                <a
+                  href="https://testbook.com/pdf-viewer?u=https:%2F%2Fcdn.testbook.com%2F1746257479224-Engineering%20Mechanics%20Notes.pdf%2F1746257478.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg transition-all group shadow-xs"
+                >
+                  <div className="text-xs font-bold text-slate-800 group-hover:text-sky-900 line-clamp-1">
+                    Engg. Mechanics Notes
+                  </div>
+                  <div className="flex items-center justify-between mt-1 text-[10px] text-rose-600 font-semibold">
+                    <span>PDF Viewer</span>
+                    <ExternalLink className="w-3 h-3 shrink-0 opacity-70 group-hover:opacity-100" />
+                  </div>
+                </a>
+
+                {/* 5. Formulas & Surveying Notes */}
+                <a
+                  href="https://testbook.com/pdf-viewer?u=https:%2F%2Fcdn.testbook.com%2F1746257479224-Surveying%20Notes.pdf%2F1746257478.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg transition-all group shadow-xs"
+                >
+                  <div className="text-xs font-bold text-slate-800 group-hover:text-sky-900 line-clamp-1">
+                    Surveying & Formulas
+                  </div>
+                  <div className="flex items-center justify-between mt-1 text-[10px] text-rose-600 font-semibold">
+                    <span>PDF Viewer</span>
+                    <ExternalLink className="w-3 h-3 shrink-0 opacity-70 group-hover:opacity-100" />
+                  </div>
+                </a>
+
+                {/* 6. Civil Engineering Hub */}
+                <a
+                  href="https://testbook.com/civil-engineering"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col justify-between p-2.5 bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-400 rounded-lg transition-all group shadow-xs"
+                >
+                  <div className="text-xs font-bold text-slate-800 group-hover:text-sky-900 line-clamp-1">
+                    Civil Engineering Hub
+                  </div>
+                  <div className="flex items-center justify-between mt-1 text-[10px] text-sky-600 font-semibold">
+                    <span>Courses & Exams</span>
+                    <ExternalLink className="w-3 h-3 shrink-0 opacity-70 group-hover:opacity-100" />
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* BOTTOM BAR: RATING & PREPARE MORE CTA */}
+          <div className="pt-4 border-t border-slate-200 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            {/* Star Rating */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-slate-600 uppercase">Rate:</span>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => handleStarClick(star)}
+                  className={`text-base sm:text-lg cursor-pointer transition-transform hover:scale-125 ${
+                    star <= rating ? 'text-amber-400' : 'text-slate-300'
+                  }`}
+                  title={`${star} Star`}
+                >
+                  ★
+                </button>
+              ))}
+              {hasRated && (
+                <span className="text-[10px] text-emerald-600 font-bold ml-1">
+                  Saved!
+                </span>
+              )}
+            </div>
+
+            {/* PREPARE MORE BUTTON */}
             <a
-              className="result-button flex-1 py-3 px-3 sm:px-4 bg-sky-600 hover:bg-sky-700 text-white font-black text-xs uppercase tracking-wider rounded-lg shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all"
-              href="https://testbook.com/super-coaching/rrb-je-civil-complete-preparation-course"
+              href="https://testbook.com/ae-je-civil-previous-year/test-series/my"
               target="_blank"
               rel="noopener noreferrer"
+              className="py-2 px-4 bg-sky-600 hover:bg-sky-700 text-white font-black text-xs uppercase tracking-wider rounded-lg shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all"
             >
-              <span>PREPARE MORE</span>
+              <span>PREPARE MORE ON TESTBOOK</span>
               <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-
-            <a
-              href="/civil-engineering-quiz.zip"
-              download="civil-engineering-quiz.zip"
-              title="Download Complete Project ZIP"
-              className="py-3 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-lg border border-slate-300 flex items-center justify-center gap-1.5 cursor-pointer transition-all"
-            >
-              <Download className="w-4 h-4 text-slate-600" />
-              <span className="hidden sm:inline">ZIP</span>
             </a>
           </div>
         </div>

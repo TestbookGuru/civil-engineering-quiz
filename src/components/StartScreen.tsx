@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { BookOpen, Award, Layers, Download } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { BookOpen, Layers } from 'lucide-react';
 import { sound } from '../utils/sound';
 import { QUESTION_CATEGORIES } from '../data/questions';
+import { BulldozerScene } from './BulldozerScene';
 
 interface StartScreenProps {
   onStart: (category: string) => void;
@@ -12,26 +13,28 @@ interface StartScreenProps {
 export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All Topics');
   const [showTopics, setShowTopics] = useState<boolean>(false);
+  const [isBulldozerExiting, setIsBulldozerExiting] = useState<boolean>(false);
+  const startTriggeredRef = useRef<boolean>(false);
 
   const handleStart = () => {
-    sound.buttonClick();
-    onStart(selectedCategory);
+    if (startTriggeredRef.current) return;
+    startTriggeredRef.current = true;
+
+    // Trigger Bulldozer engine rev & drive-out to the right
+    sound.engineRev();
+    sound.bulldozerHonk();
+    setIsBulldozerExiting(true);
+
+    // After the bulldozer drives out off-screen to the right, launch the quiz
+    setTimeout(() => {
+      onStart(selectedCategory);
+    }, 1100);
   };
 
   return (
-    <section className="view start-screen active flex flex-col items-center justify-center min-h-screen text-center z-10 px-4">
+    <section className="view start-screen active flex flex-col items-center justify-start min-h-screen text-center z-10 px-4 pt-8 sm:pt-12 pb-[230px] sm:pb-[270px] md:pb-[310px] overflow-hidden">
       {/* Top Header Control Bar */}
       <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
-        <a
-          href="/civil-engineering-quiz.zip"
-          download="civil-engineering-quiz.zip"
-          title="Download Complete Project ZIP"
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold tracking-wider uppercase bg-[#082949]/80 border border-[#20e7ff]/40 hover:border-[#20e7ff] text-[#8ff4ff] rounded transition-all cursor-pointer shadow-lg hover:bg-[#082949]"
-        >
-          <Download className="w-3.5 h-3.5 text-[#20e7ff]" />
-          <span className="hidden sm:inline">Download ZIP</span>
-        </a>
-
         <button
           onClick={() => setShowTopics(!showTopics)}
           title="Browse Topics"
@@ -42,7 +45,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         </button>
       </div>
 
-      <div className="start-content">
+      <div className="start-content flex flex-col items-center max-w-4xl w-full my-auto z-10">
         <h1 className="game-title">
           CIVIL
           <span>ENGINEERING</span>
@@ -52,7 +55,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
           QUICK FIRE
         </div>
 
-        <div className="start-stats flex justify-center gap-3 sm:gap-4 my-6 flex-wrap">
+        {/* Challenge Stats */}
+        <div className="start-stats flex justify-center gap-3 sm:gap-6 flex-wrap my-4">
           <div className="stat-box">
             <div className="stat-number">10</div>
             <div className="stat-label">QUESTIONS</div>
@@ -65,29 +69,22 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         </div>
 
         {/* Start Button */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center mt-2 mb-6">
           <button
             onClick={handleStart}
-            className="start-button cursor-pointer select-none"
+            disabled={isBulldozerExiting}
+            className={`start-button cursor-pointer select-none transition-all ${
+              isBulldozerExiting ? 'opacity-80 scale-95 cursor-not-allowed' : 'hover:scale-105 active:scale-95'
+            }`}
             id="startButton"
           >
-            PRESS START
+            {isBulldozerExiting ? 'STARTING...' : 'PRESS START'}
           </button>
-
-          <div className="start-hint text-[#8ec7dc] tracking-wider text-xs">
-            {selectedCategory === 'All Topics'
-              ? '200 HIGH-YIELD QUESTIONS • SPEED & REASONING'
-              : `MODE: ${selectedCategory.toUpperCase()} SPRINT`}
-          </div>
-        </div>
-
-        {/* Instructions strip */}
-        <div className="mt-8 flex items-center justify-center gap-4 text-[11px] text-[#78a5b8] uppercase tracking-widest">
-          <span className="hidden sm:inline">Use Keys 1, 2, 3, 4 for instantaneous answering</span>
-          <span className="hidden sm:inline">•</span>
-          <span>Fast Pace • Instant Scoring</span>
         </div>
       </div>
+
+      {/* BULLDOZER WITH CIVIL ENGINEER ON THE BOTTOM ROAD */}
+      <BulldozerScene isExiting={isBulldozerExiting} />
 
       {/* Topic selection modal */}
       {showTopics && (
@@ -151,3 +148,4 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
     </section>
   );
 };
+
