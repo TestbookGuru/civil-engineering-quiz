@@ -83,7 +83,7 @@ export const SignupModal: React.FC<SignupModalProps> = ({
       {/* ======================================================== */}
       {/* BRIGHT COLOR POPUP BOX                                   */}
       {/* ======================================================== */}
-      <div className="relative w-full max-w-[460px] my-auto bg-gradient-to-b from-white via-sky-50/60 to-amber-50/70 border-3 border-amber-400 rounded-2xl shadow-[0_25px_60px_-15px_rgba(255,183,3,0.45),0_0_30px_rgba(32,231,255,0.25)] p-6 sm:p-7 text-slate-900 z-10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="signup-card relative w-full max-w-[460px] my-auto bg-gradient-to-b from-white via-sky-50/60 to-amber-50/70 border-3 border-amber-400 rounded-2xl shadow-[0_25px_60px_-15px_rgba(255,183,3,0.45),0_0_30px_rgba(32,231,255,0.25)] p-6 sm:p-7 text-slate-900 z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Top Dismiss Button */}
         <button
           onClick={onClose}
@@ -100,16 +100,16 @@ export const SignupModal: React.FC<SignupModalProps> = ({
         </div>
 
         {/* Modal Title in Bright, Bold Slate-900 */}
-        <div className="text-2xl sm:text-[26px] font-black text-slate-900 mt-2.5 tracking-tight leading-tight">
+        <div className="signup-title text-2xl sm:text-[26px] font-black text-slate-900 mt-2.5 tracking-tight leading-tight">
           Unlock Your Scorecard
         </div>
 
         {/* Subtitle with cool clarity */}
-        <div className="text-xs sm:text-[13px] text-slate-600 mt-1.5 leading-relaxed font-medium">
+        <div className="signup-copy text-xs sm:text-[13px] text-slate-600 mt-1.5 leading-relaxed font-medium">
           Enter your details below to instantly view your official Civil Engineering performance breakdown, ranking, and step-by-step solutions:
         </div>
 
-        <form onSubmit={handleSubmit} id="signupForm" className="mt-5 space-y-3.5">
+        <form onSubmit={handleSubmit} id="signupForm" className="signup-form mt-5 space-y-3.5">
           {/* Full Name Field */}
           <div className="form-group text-left">
             <label
@@ -193,7 +193,7 @@ export const SignupModal: React.FC<SignupModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-300 hover:to-orange-400 disabled:opacity-70 disabled:cursor-not-allowed text-slate-950 font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_12px_24px_-4px_rgba(245,158,11,0.55)] cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0 border border-amber-300"
+              className="signup-submit w-full py-3.5 px-4 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-300 hover:to-orange-400 disabled:opacity-70 disabled:cursor-not-allowed text-slate-950 font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_12px_24px_-4px_rgba(245,158,11,0.55)] cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0 border border-amber-300"
             >
               {isSubmitting ? 'SAVING DETAILS...' : 'SIGN IN & VIEW SCORECARD ➔'}
             </button>

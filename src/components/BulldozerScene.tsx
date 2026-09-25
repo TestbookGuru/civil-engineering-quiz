@@ -33,7 +33,7 @@ export const BulldozerScene: React.FC<BulldozerSceneProps> = ({
 
   return (
     <div
-      className="absolute bottom-[20px] sm:bottom-[28px] md:bottom-[35px] left-0 right-0 h-[210px] sm:h-[260px] md:h-[300px] pointer-events-none z-20 overflow-visible"
+      className="bulldozer-scene absolute bottom-[20px] sm:bottom-[28px] md:bottom-[35px] left-0 right-0 h-[210px] sm:h-[260px] md:h-[300px] pointer-events-none z-20 overflow-visible"
       aria-label="Bulldozer with Civil Engineer Mascot"
     >
       {/* BULLDOZER DRIVE-IN CONTAINER (Stops right in the center / in between) */}
@@ -51,14 +51,14 @@ export const BulldozerScene: React.FC<BulldozerSceneProps> = ({
       >
         {/* SPEECH BUBBLE (Big, vibrant yellow hook font) */}
         <div
-          className={`absolute -top-[100px] sm:-top-[115px] md:-top-[125px] left-[5%] sm:left-[12%] md:left-[16%] z-30 transition-all duration-300 pointer-events-none select-none ${
+          className={`bulldozer-speech absolute -top-[100px] sm:-top-[115px] md:-top-[125px] left-[5%] sm:left-[12%] md:left-[16%] z-30 transition-all duration-300 pointer-events-none select-none ${
             hasEntered && !isExiting ? 'opacity-100 scale-100' : isExiting ? 'opacity-95 scale-105' : 'opacity-0 scale-90'
           }`}
           style={{
             animation: hasEntered && !isExiting ? 'bubbleFloat 3s ease-in-out infinite' : undefined,
           }}
         >
-          <div className="relative bg-[#06182e] border-[3px] border-[#ffd43b] px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-2xl shadow-[0_16px_36px_rgba(0,0,0,0.8),0_0_24px_rgba(255,212,59,0.4)] w-max max-w-[280px] sm:max-w-[360px] md:max-w-[420px] text-center">
+          <div className="bulldozer-speech-card relative bg-[#06182e] border-[3px] border-[#ffd43b] px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-2xl shadow-[0_16px_36px_rgba(0,0,0,0.8),0_0_24px_rgba(255,212,59,0.4)] w-max max-w-[280px] sm:max-w-[360px] md:max-w-[420px] text-center">
             {/* Speech bubble tail pointer pointing to the engineer */}
             <div className="absolute -bottom-3.5 left-14 sm:left-20 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-t-[#ffd43b]">
               <div className="absolute -top-[14px] -left-[8px] w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[11px] border-t-[#06182e]" />
@@ -73,11 +73,11 @@ export const BulldozerScene: React.FC<BulldozerSceneProps> = ({
         {/* BULLDOZER & CIVIL ENGINEER SVG (Large Size, Click to Honk!) */}
         <div
           onClick={handleHonk}
-          className="cursor-pointer group select-none transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          className="bulldozer-machine cursor-pointer group select-none transition-transform hover:scale-[1.02] active:scale-[0.98]"
           title="Click to Honk!"
         >
           <svg
-            className="w-[320px] sm:w-[410px] md:w-[490px] lg:w-[540px] h-auto drop-shadow-[0_20px_25px_rgba(0,0,0,0.55)]"
+            className="bulldozer-svg w-[320px] sm:w-[410px] md:w-[490px] lg:w-[540px] h-auto drop-shadow-[0_20px_25px_rgba(0,0,0,0.55)]"
             viewBox="0 0 320 180"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

@@ -198,8 +198,8 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
           </div>
 
           {/* MAIN CIRCULAR SCORE RING */}
-          <div className="relative z-10 my-4 flex flex-col items-center">
-            <div className="relative w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center">
+          <div className="score-ring-block relative z-10 my-4 flex flex-col items-center">
+            <div className="score-ring relative w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 130 130">
                 {/* Background Ring */}
                 <circle
@@ -227,11 +227,11 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
               {/* Inside Circle Content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                <span className="score-main-value text-3xl sm:text-4xl font-black text-white tracking-tight">
                   {displayScore}
-                  <span className="text-lg sm:text-xl font-bold text-sky-300">/10</span>
+                  <span className="score-denominator text-lg sm:text-xl font-bold text-sky-300">/10</span>
                 </span>
-                <span className="text-xs font-black text-[#ffd43b] tracking-wider mt-0.5">
+                <span className="score-accuracy-text text-xs font-black text-[#ffd43b] tracking-wider mt-0.5">
                   {displayPercent}% ACCURACY
                 </span>
               </div>
@@ -239,17 +239,17 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
             {/* STATUS TITLE & MESSAGE */}
             <div className="mt-2 text-center">
-              <div className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase">
+              <div className="score-status-title text-xl sm:text-2xl font-black text-white tracking-tight uppercase">
                 {title}
               </div>
-              <div className="text-xs text-sky-200 mt-1 max-w-[260px] mx-auto leading-snug">
+              <div className="score-status-message text-xs text-sky-200 mt-1 max-w-[260px] mx-auto leading-snug">
                 {message}
               </div>
             </div>
           </div>
 
           {/* STATS TILES (ACCURACY, CORRECT, TOTAL) */}
-          <div className="relative z-10 w-full grid grid-cols-3 gap-2 my-2">
+          <div className="score-stats relative z-10 w-full grid grid-cols-3 gap-2 my-2">
             <div className="bg-slate-800/80 border border-sky-400/20 p-2.5 rounded-lg text-center">
               <div className="text-[10px] font-black uppercase tracking-wider text-sky-300">
                 ACCURACY
@@ -279,7 +279,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
           </div>
 
           {/* ACTION BUTTONS */}
-          <div className="relative z-10 w-full flex flex-col gap-2 mt-2">
+          <div className="score-actions relative z-10 w-full flex flex-col gap-2 mt-2">
             {!isUnlocked ? (
               <>
                 <button
@@ -330,10 +330,10 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
         </div>
 
         {/* RIGHT COLUMN: PROGRESSION CHART & STUDY RESOURCES */}
-        <div className="md:col-span-7 bg-white p-5 sm:p-6 flex flex-col justify-between text-left">
+        <div className="results-main-panel md:col-span-7 bg-white p-5 sm:p-6 flex flex-col justify-between text-left">
           <div>
             {/* PERFORMANCE GRAPH HEADER */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+            <div className="results-progress-header flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
               <div className="flex items-center gap-1.5 text-xs font-black tracking-wider text-slate-800 uppercase">
                 <TrendingUp className="w-4 h-4 text-sky-600" />
                 <span>PROGRESSION (LAST 5 SESSIONS)</span>
@@ -344,7 +344,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
             </div>
 
             {/* RECHARTS LINE GRAPH */}
-            <div className="h-36 sm:h-40 w-full bg-slate-50/80 border border-slate-200 rounded-lg p-2 relative">
+            <div className="progress-chart h-36 sm:h-40 w-full bg-slate-50/80 border border-slate-200 rounded-lg p-2 relative">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
@@ -386,8 +386,8 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
             </div>
 
             {/* TESTBOOK STUDY RESOURCES: STRICT 3x2 on Desktop, 2x3 on Mobile */}
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
+            <div className="resources-section mt-4">
+              <div className="resources-header flex items-center justify-between mb-2">
                 <div className="text-[11px] font-black tracking-wider text-slate-800 uppercase flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5 text-sky-600" />
                   <span>TESTBOOK CIVIL STUDY RESOURCES</span>
@@ -398,7 +398,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
               </div>
 
               {/* 3 cols x 2 rows (desktop) and 2 cols x 3 rows (mobile) */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="resources-grid grid grid-cols-2 md:grid-cols-3 gap-2">
                 {/* 1. Test Series */}
                 <a
                   href="https://testbook.com/ae-je-civil-previous-year/test-series/my"
@@ -499,7 +499,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
           </div>
 
           {/* BOTTOM BAR: RATING & PREPARE MORE CTA */}
-          <div className="pt-4 border-t border-slate-200 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="results-bottom-bar pt-4 border-t border-slate-200 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             {/* Star Rating */}
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] font-bold text-slate-600 uppercase">Rate:</span>
