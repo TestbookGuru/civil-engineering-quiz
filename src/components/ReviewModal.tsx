@@ -16,10 +16,10 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, recor
   const item = records[currentIdx];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-gradient-to-br from-[#061d3a] to-[#082a4d] border border-[#20e7ff] p-5 sm:p-7 shadow-2xl rounded-sm my-auto">
+    <div className="review-modal fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
+      <div className="review-card relative w-full max-w-2xl bg-gradient-to-br from-[#061d3a] to-[#082a4d] border border-[#20e7ff] p-5 sm:p-7 shadow-2xl rounded-sm my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#20e7ff]/30 pb-3 mb-4">
+        <div className="review-header flex items-center justify-between border-b border-[#20e7ff]/30 pb-3 mb-4">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black uppercase tracking-widest text-[#ffd43b]">
               Question {currentIdx + 1} of {records.length}
@@ -38,12 +38,12 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, recor
         </div>
 
         {/* Question Text */}
-        <div className="text-base sm:text-lg font-bold text-white mb-4 leading-snug">
+        <div className="review-question text-base sm:text-lg font-bold text-white mb-4 leading-snug">
           {item.question}
         </div>
 
         {/* Options list */}
-        <div className="space-y-2 mb-5">
+        <div className="review-options space-y-2 mb-5">
           {item.options.map((opt, oIdx) => {
             const isUserSelection = item.selectedIndex === oIdx;
             const isCorrectOption = opt.correct;
@@ -85,7 +85,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, recor
 
         {/* Explanation box */}
         {item.explanation && (
-          <div className="p-3 bg-[#0a2642]/80 border border-[#20e7ff]/30 rounded text-xs text-[#a0d2e8] leading-relaxed mb-5">
+          <div className="review-explanation p-3 bg-[#0a2642]/80 border border-[#20e7ff]/30 rounded text-xs text-[#a0d2e8] leading-relaxed mb-5">
             <div className="flex items-center gap-1.5 text-[#ffd43b] font-bold mb-1 uppercase tracking-wider text-[10px]">
               <HelpCircle className="w-3.5 h-3.5" /> Concept Note:
             </div>
@@ -94,7 +94,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, recor
         )}
 
         {/* Navigation buttons */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/10">
+        <div className="review-nav flex items-center justify-between pt-2 border-t border-white/10">
           <button
             onClick={() => setCurrentIdx((prev) => Math.max(0, prev - 1))}
             disabled={currentIdx === 0}
@@ -103,7 +103,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, recor
             <ArrowLeft className="w-3.5 h-3.5" /> Previous
           </button>
 
-          <span className="text-xs text-[#7bbcd0] font-semibold">
+          <span className="review-status text-xs text-[#7bbcd0] font-semibold">
             Status: {item.isCorrect ? (
               <span className="text-[#35e58b] font-bold">Correct (+1)</span>
             ) : item.selectedIndex === -1 ? (

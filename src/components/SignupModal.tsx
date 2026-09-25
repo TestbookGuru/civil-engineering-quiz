@@ -193,9 +193,9 @@ export const SignupModal: React.FC<SignupModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="signup-submit w-full py-3.5 px-4 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-300 hover:to-orange-400 disabled:opacity-70 disabled:cursor-not-allowed text-slate-950 font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_12px_24px_-4px_rgba(245,158,11,0.55)] cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0 border border-amber-300"
+              className="signup-submit w-full py-3.5 px-4 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 hover:from-yellow-300 hover:to-orange-400 disabled:opacity-70 disabled:cursor-not-allowed text-slate-950 font-black text-sm tracking-wide rounded-xl shadow-[0_12px_24px_-4px_rgba(245,158,11,0.55)] cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0 border border-amber-300"
             >
-              {isSubmitting ? 'SAVING DETAILS...' : 'SIGN IN & VIEW SCORECARD ➔'}
+              {isSubmitting ? 'Loading Score' : 'Check Your Score'}
             </button>
             {submitError && (
               <p className="text-center text-[11px] text-rose-600 font-bold mt-2">

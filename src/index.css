@@ -1472,3 +1472,563 @@ body {
     font-size: 8px !important;
   }
 }
+
+
+/* =========================================================
+   DEDICATED MOBILE EXPERIENCE
+   The mobile UI is intentionally simpler than desktop so the
+   quiz remains readable inside narrow WordPress iframes.
+   ========================================================= */
+.mobile-results-card {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  html,
+  body,
+  #root,
+  .game-shell {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+
+  body,
+  .game-shell {
+    overflow: hidden !important;
+  }
+
+  /* ---------- Start screen ---------- */
+  .start-screen {
+    height: 100vh !important;
+    min-height: 0 !important;
+    padding: 10px 10px 128px !important;
+    justify-content: flex-start !important;
+  }
+
+  .start-screen > .absolute.top-4.right-4 {
+    top: 8px !important;
+    right: 8px !important;
+  }
+
+  .start-screen > .absolute.top-4.right-4 button {
+    padding: 5px 8px !important;
+    font-size: 9px !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .start-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 36px auto 0 !important;
+    transform: none !important;
+  }
+
+  .game-title {
+    margin-top: 0 !important;
+    font-size: clamp(32px, 11vw, 44px) !important;
+    line-height: 0.86 !important;
+    letter-spacing: -1.5px !important;
+  }
+
+  .mode-name {
+    margin-top: 7px !important;
+    font-size: 12px !important;
+    letter-spacing: 4px !important;
+  }
+
+  .start-stats {
+    margin: 11px 0 9px !important;
+    gap: 7px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .stat-box {
+    min-width: 100px !important;
+    padding: 7px 10px !important;
+  }
+
+  .stat-number {
+    font-size: 21px !important;
+  }
+
+  .stat-label {
+    font-size: 8px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .start-content > div:last-child {
+    margin: 0 !important;
+  }
+
+  .start-button {
+    min-width: 195px !important;
+    padding: 10px 20px !important;
+    font-size: 12px !important;
+    letter-spacing: 2.5px !important;
+  }
+
+  .bulldozer-scene {
+    height: 120px !important;
+    bottom: 2px !important;
+  }
+
+  .bulldozer-svg {
+    width: 230px !important;
+  }
+
+  .bulldozer-speech {
+    top: -65px !important;
+    left: 3% !important;
+  }
+
+  .bulldozer-speech-card {
+    max-width: 215px !important;
+    padding: 6px 9px !important;
+    border-width: 2px !important;
+  }
+
+  .bulldozer-speech-card p {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Decorative floating objects add clutter on a phone. */
+  .world-object {
+    display: none !important;
+  }
+
+  /* ---------- Quiz ---------- */
+  .quiz-screen {
+    height: 100vh !important;
+    min-height: 0 !important;
+    padding: 7px !important;
+    align-items: stretch !important;
+  }
+
+  .quiz-hud {
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  .hud-top {
+    height: 58px !important;
+    grid-template-columns: auto 1fr auto !important;
+    gap: 6px !important;
+  }
+
+  .hud-brand {
+    gap: 5px !important;
+    font-size: 8px !important;
+    letter-spacing: 0.8px !important;
+  }
+
+  .brand-mark {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .brand-mark:after {
+    width: 5px !important;
+    height: 5px !important;
+    left: 5px !important;
+    top: 5px !important;
+  }
+
+  .progress-wrap {
+    gap: 2px !important;
+  }
+
+  .progress-segment {
+    width: clamp(10px, 3.1vw, 14px) !important;
+    height: 4px !important;
+  }
+
+  .timer-box {
+    min-width: 66px !important;
+    padding: 5px 6px !important;
+    border-width: 1px !important;
+  }
+
+  .timer-label {
+    font-size: 6px !important;
+    letter-spacing: 0.8px !important;
+  }
+
+  .timer-number {
+    font-size: 18px !important;
+  }
+
+  .question-panel {
+    flex: 1 1 auto !important;
+    justify-content: flex-start !important;
+    min-height: 0 !important;
+    margin: 4px 0 !important;
+    padding: 14px 12px 12px !important;
+    clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px) !important;
+  }
+
+  .question-meta {
+    margin-bottom: 8px !important;
+    gap: 6px !important;
+  }
+
+  .question-number {
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .question-tag {
+    max-width: 52% !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    font-size: 7px !important;
+  }
+
+  .question-text {
+    font-size: clamp(15px, 4.4vw, 18px) !important;
+    line-height: 1.22 !important;
+    margin: 0 0 8px !important;
+  }
+
+  .answers {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    margin-top: 4px !important;
+  }
+
+  .answer-btn {
+    min-height: 46px !important;
+    gap: 8px !important;
+    padding: 6px 9px !important;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)) !important;
+  }
+
+  .answer-key {
+    flex-basis: 27px !important;
+    width: 27px !important;
+    height: 27px !important;
+    font-size: 10px !important;
+  }
+
+  .answer-text {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  .quiz-footer {
+    height: 27px !important;
+    font-size: 8px !important;
+    letter-spacing: 1px !important;
+  }
+
+  /* ---------- Completion ---------- */
+  .complete-screen {
+    height: 100vh !important;
+    min-height: 0 !important;
+    padding: 10px !important;
+  }
+
+  .complete-card {
+    width: 94vw !important;
+    padding: 22px 16px !important;
+    clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px) !important;
+  }
+
+  .complete-small {
+    font-size: 9px !important;
+    letter-spacing: 2px !important;
+  }
+
+  .complete-title {
+    margin-top: 7px !important;
+    font-size: 28px !important;
+  }
+
+  .complete-sub {
+    margin-top: 8px !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  .complete-button {
+    margin-top: 14px !important;
+    padding: 11px 20px !important;
+    font-size: 12px !important;
+  }
+
+  /* ---------- Signup ---------- */
+  .modal.active {
+    padding: 8px !important;
+    align-items: center !important;
+  }
+
+  .signup-card {
+    width: 100% !important;
+    max-width: 390px !important;
+    max-height: 96vh !important;
+    overflow-y: auto !important;
+    padding: 15px !important;
+    border-radius: 14px !important;
+  }
+
+  .signup-card > .inline-flex {
+    font-size: 9px !important;
+    padding: 4px 8px !important;
+  }
+
+  .signup-title {
+    margin-top: 6px !important;
+    font-size: 20px !important;
+  }
+
+  .signup-copy {
+    margin-top: 4px !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+  }
+
+  .signup-card .signup-form {
+    margin-top: 10px !important;
+  }
+
+  .signup-card .signup-form > * + * {
+    margin-top: 8px !important;
+  }
+
+  .signup-card label {
+    font-size: 9px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .signup-card input {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    font-size: 12px !important;
+  }
+
+  .signup-submit {
+    padding: 11px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Hide assurance badges on mobile; the form fields and score CTA matter most. */
+  .signup-form > div:last-child {
+    display: none !important;
+  }
+
+  /* ---------- Results: completely different mobile scorecard ---------- */
+  .results-screen {
+    height: 100vh !important;
+    min-height: 0 !important;
+    padding: 10px !important;
+    overflow: hidden !important;
+    align-items: center !important;
+  }
+
+  .desktop-results-layout {
+    display: none !important;
+  }
+
+  .mobile-results-card {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 390px !important;
+    max-height: calc(100vh - 20px) !important;
+    margin: auto !important;
+    padding: 20px 16px 16px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    color: #ffffff !important;
+    background: linear-gradient(180deg, #082a4a 0%, #06182e 100%) !important;
+    border: 1px solid rgba(32, 231, 255, 0.65) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 18px 45px rgba(2, 25, 48, 0.35) !important;
+    overflow: hidden !important;
+  }
+
+  .mobile-results-kicker {
+    color: #8ff4ff !important;
+    font-size: 9px !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px !important;
+  }
+
+  .mobile-score-line {
+    margin-top: 12px !important;
+    line-height: 1 !important;
+  }
+
+  .mobile-score-number {
+    color: #ffffff !important;
+    font-size: clamp(58px, 18vw, 76px) !important;
+    font-weight: 950 !important;
+    letter-spacing: -4px !important;
+  }
+
+  .mobile-score-total {
+    margin-left: 4px !important;
+    color: #7dd3fc !important;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+  }
+
+  .mobile-accuracy-pill {
+    margin-top: 7px !important;
+    padding: 5px 11px !important;
+    color: #08111e !important;
+    background: #ffd43b !important;
+    border-radius: 999px !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+  }
+
+  .mobile-result-title {
+    margin-top: 14px !important;
+    color: #ffffff !important;
+    font-size: 21px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+  }
+
+  .mobile-result-message {
+    margin-top: 5px !important;
+    max-width: 300px !important;
+    color: #bae6fd !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  .mobile-result-actions {
+    display: grid !important;
+    width: 100% !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-top: 18px !important;
+  }
+
+  .mobile-review-btn,
+  .mobile-retry-btn,
+  .mobile-prepare-btn {
+    min-height: 42px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+    font-weight: 850 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+  }
+
+  .mobile-review-btn {
+    color: #061225 !important;
+    background: #20e7ff !important;
+    border: 0 !important;
+  }
+
+  .mobile-retry-btn {
+    color: #e0f2fe !important;
+    background: #0f2e4d !important;
+    border: 1px solid rgba(125, 211, 252, 0.4) !important;
+  }
+
+  .mobile-prepare-btn {
+    width: 100% !important;
+    margin-top: 9px !important;
+    color: #061225 !important;
+    background: linear-gradient(135deg, #ffd43b, #ff9f1c) !important;
+  }
+}
+
+
+@media (max-width: 600px) {
+  /* ---------- Review modal ---------- */
+  .review-modal {
+    padding: 7px !important;
+  }
+
+  .review-card {
+    max-height: 96vh !important;
+    overflow-y: auto !important;
+    padding: 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .review-header {
+    padding-bottom: 7px !important;
+    margin-bottom: 9px !important;
+  }
+
+  .review-header > div:first-child {
+    min-width: 0 !important;
+    gap: 5px !important;
+  }
+
+  .review-header span:first-child {
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .review-header span:nth-child(2) {
+    max-width: 145px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    font-size: 7px !important;
+  }
+
+  .review-question {
+    margin-bottom: 9px !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+  }
+
+  .review-options {
+    margin-bottom: 10px !important;
+  }
+
+  .review-options > div {
+    padding: 7px !important;
+    font-size: 10px !important;
+  }
+
+  .review-options > div > div:first-child {
+    gap: 6px !important;
+  }
+
+  .review-options > div > div:first-child > span:first-child {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 9px !important;
+    flex: 0 0 18px !important;
+  }
+
+  .review-options .uppercase {
+    display: none !important;
+  }
+
+  .review-explanation {
+    margin-bottom: 10px !important;
+    padding: 8px !important;
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+  }
+
+  .review-nav {
+    gap: 6px !important;
+  }
+
+  .review-nav button {
+    padding: 6px 8px !important;
+    font-size: 9px !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .review-status {
+    font-size: 9px !important;
+    text-align: center !important;
+  }
+}

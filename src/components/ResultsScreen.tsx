@@ -173,7 +173,44 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
   return (
     <section className="view results-screen active flex items-center justify-center min-h-screen p-2 sm:p-4 z-20 overflow-y-auto">
-      <div className="results-layout w-full max-w-[1100px] my-auto bg-white border border-slate-300 rounded-xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12">
+      {/* MOBILE SCORECARD: intentionally minimal to avoid cramped iframe layouts */}
+      <div className="mobile-results-card">
+        <div className="mobile-results-kicker">CIVIL QUICK FIRE RESULT</div>
+
+        <div className="mobile-score-line">
+          <span className="mobile-score-number">{displayScore}</span>
+          <span className="mobile-score-total">/{totalQuestions}</span>
+        </div>
+
+        <div className="mobile-accuracy-pill">{displayPercent}% Accuracy</div>
+
+        <div className="mobile-result-title">{title}</div>
+        <div className="mobile-result-message">{message}</div>
+
+        <div className="mobile-result-actions">
+          <button onClick={onOpenReview} className="mobile-review-btn">
+            <CheckSquare className="w-4 h-4" />
+            <span>Review Answers</span>
+          </button>
+          <button onClick={onRetry} className="mobile-retry-btn">
+            <RotateCcw className="w-4 h-4" />
+            <span>Try Again</span>
+          </button>
+        </div>
+
+        <a
+          href="https://testbook.com/ae-je-civil-previous-year/test-series/my"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mobile-prepare-btn"
+        >
+          <span>Practice More on Testbook</span>
+          <ExternalLink className="w-4 h-4" />
+        </a>
+      </div>
+
+      {/* DESKTOP / TABLET SCORECARD */}
+      <div className="results-layout desktop-results-layout w-full max-w-[1100px] my-auto bg-white border border-slate-300 rounded-xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12">
         {/* LEFT COLUMN: SCORECARD PREVIEW & RING */}
         <div className="score-side md:col-span-5 bg-gradient-to-b from-slate-900 via-sky-950 to-slate-900 text-white p-5 sm:p-7 flex flex-col items-center justify-between text-center relative border-b md:border-b-0 md:border-r border-sky-800/40">
           {/* Subtle blueprint grid overlay */}
